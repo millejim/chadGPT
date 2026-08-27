@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jimmie Jams - Rhythm Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .info-value {
+            font-size: 1.5em;
+            margin-top: 5px;
+        }
+
+        .game-area {
+            background: #2c3e50;
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lanes {
+            display: flex;
+            justify-content: space-around;
+            height: 350px;
+            position: relative;
+        }
+
+        .lane {
+            width: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lane.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .target-zone {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(46, 204, 113, 0.3);
+            border: 3px solid #2ecc71;
+            border-radius: 8px;
+        }
+
+        .note {
+            position: absolute;
+            width: 70px;
+            height: 50px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 10px;
+            top: -50px;
+            left: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            animation: fall linear;
+        }
+
+        @keyframes fall {
+            from {
+                top: -50px;
+            }
+            to {
+                top: 350px;
+            }
+        }
+
+        .key-hints {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .key-hint {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2em;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            animation: fadeOut 0.8s;
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1.5);
+            }
+        }
+
+        .feedback.perfect {
+            color: #f1c40f;
+        }
+
+        .feedback.good {
+            color: #2ecc71;
+        }
+
+        .feedback.miss {
+            color: #e74c3c;
+        }
+
+        .instructions {
+            background: rgba(52, 152, 219, 0.1);
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .instructions h3 {
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+
+        .game-over {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .game-over h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
+        .final-score {
+            font-size: 3em;
+            color: #f5576c;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .accuracy {
+            font-size: 1.5em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎵 Jimmie Jams 🎵</h1>
+        <p class="subtitle">Help Jimmie create the perfect jam by hitting the notes!</p>
+
+        <div class="game-info">
+            <div class="info-item">
+                <div class="info-label">Score</div>
+                <div class="info-value" id="score">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Combo</div>
+                <div class="info-value" id="combo">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Level</div>
+                <div class="info-value" id="level">1</div>
+            </div>
+        </div>
+
+        <div id="gameContent">
+            <div class="game-area">
+                <div class="lanes">
+                    <div class="lane" data-key="d">
+                        <div class="target-zone"></div>
+                    </div>
+                    <div class="lane" data-key="f">
+                        <div class="target-zone"></div>
+                    </div>
+                    <div class="lane" data-key="j">
+                        <div class="target-zone"></div>
+                    </div>
+                    <div class="lane" data-key="k">
+                        <div class="target-zone"></div>
+                    </div>
+                </div>
+                <div class="key-hints">
+                    <div class="key-hint">D</div>
+                    <div class="key-hint">F</div>
+                    <div class="key-hint">J</div>
+                    <div class="key-hint">K</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="startBtn" onclick="startGame()">Start Game</button>
+                <button id="pauseBtn" onclick="togglePause()" disabled>Pause</button>
+            </div>
+
+            <div class="instructions">
+                <h3>How to Play:</h3>
+                <ul>
+                    <li>Press D, F, J, or K when the notes reach the green target zone</li>
+                    <li>Perfect hits give more points and build your combo</li>
+                    <li>Miss too many notes and the game ends</li>
+                    <li>Each level gets faster - can you keep up with Jimmie's jam?</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const keys = ['d', 'f', 'j', 'k'];
+        let score = 0;
+        let combo = 0;
+        let level = 1;
+        let gameActive = false;
+        let paused = false;
+        let notes = [];
+        let noteSpeed = 3000;
+        let spawnInterval;
+        let gameLoop;
+        let missedNotes = 0;
+        let maxMisses = 10;
+        let totalNotes = 0;
+        let hitNotes = 0;
+
+        function startGame() {
+            score = 0;
+            combo = 0;
+            level = 1;
+            missedNotes = 0;
+            totalNotes = 0;
+            hitNotes = 0;
+            noteSpeed = 3000;
+            notes = [];
+            gameActive = true;
+            paused = false;
+
+            updateDisplay();
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+
+            // Clear any existing notes
+            document.querySelectorAll('.note').forEach(note => note.remove());
+
+            spawnInterval = setInterval(spawnNote, 1000);
+            gameLoop = setInterval(checkNotes, 50);
+        }
+
+        function togglePause() {
+            paused = !paused;
+            document.getElementById('pauseBtn').textContent = paused ? 'Resume' : 'Pause';
+            
+            if (paused) {
+                clearInterval(spawnInterval);
+                clearInterval(gameLoop);
+            } else {
+                spawnInterval = setInterval(spawnNote, 1000);
+                gameLoop = setInterval(checkNotes, 50);
+            }
+        }
+
+        function spawnNote() {
+            if (!gameActive || paused) return;
+
+            const randomKey = keys[Math.floor(Math.random() * keys.length)];
+            const lane = document.querySelector(`.lane[data-key="${randomKey}"]`);
+            
+            const note = document.createElement('div');
+            note.className = 'note';
+            note.textContent = randomKey.toUpperCase();
+            note.dataset.key = randomKey;
+            note.dataset.spawnTime = Date.now();
+            note.style.animationDuration = `${noteSpeed}ms`;
+            
+            lane.appendChild(note);
+            notes.push(note);
+            totalNotes++;
+        }
+
+        function checkNotes() {
+            if (!gameActive || paused) return;
+
+            notes.forEach((note, index) => {
+                const elapsed = Date.now() - parseInt(note.dataset.spawnTime);
+                
+                // Note passed the target zone
+                if (elapsed > noteSpeed + 200) {
+                    note.remove();
+                    notes.splice(index, 1);
+                    missNote();
+                }
+            });
+        }
+
+        function hitNote(key) {
+            if (!gameActive || paused) return;
+
+            const lane = document.querySelector(`.lane[data-key="${key}"]`);
+            lane.classList.add('active');
+            setTimeout(() => lane.classList.remove('active'), 100);
+
+            let hit = false;
+            let hitQuality = 'miss';
+
+            for (let i = 0; i < notes.length; i++) {
+                const note = notes[i];
+                if (note.dataset.key === key) {
+                    const elapsed = Date.now() - parseInt(note.dataset.spawnTime);
+                    const targetTime = noteSpeed - 200;
+                    const timeDiff = Math.abs(elapsed - targetTime);
+
+                    if (timeDiff < 150) {
+                        hitQuality = 'perfect';
+                        score += 100 * (combo + 1);
+                        combo++;
+                        hit = true;
+                        hitNotes++;
+                    } else if (timeDiff < 300) {
+                        hitQuality = 'good';
+                        score += 50 * (combo + 1);
+                        combo++;
+                        hit = true;
+                        hitNotes++;
+                    }
+
+                    if (hit) {
+                        note.remove();
+                        notes.splice(i, 1);
+                        showFeedback(hitQuality);
+                        checkLevelUp();
+                        updateDisplay();
+                        break;
+                    }
+                }
+            }
+
+            if (!hit) {
+                showFeedback('miss');
+            }
+        }
+
+        function missNote() {
+            combo = 0;
+            missedNotes++;
+            showFeedback('miss');
+            updateDisplay();
+
+            if (missedNotes >= maxMisses) {
+                endGame();
+            }
+        }
+
+        function showFeedback(type) {
+            const feedback = document.createElement('div');
+            feedback.className = `feedback ${type}`;
+            
+            if (type === 'perfect') {
+                feedback.textContent = 'PERFECT!';
+            } else if (type === 'good') {
+                feedback.textContent = 'GOOD!';
+            } else {
+                feedback.textContent = 'MISS!';
+            }
+
+            document.querySelector('.game-area').appendChild(feedback);
+            setTimeout(() => feedback.remove(), 800);
+        }
+
+        function checkLevelUp() {
+            const newLevel = Math.floor(score / 1000) + 1;
+            if (newLevel > level) {
+                level = newLevel;
+                noteSpeed = Math.max(1500, 3000 - (level * 200));
+                showFeedback('perfect');
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('combo').textContent = combo;
+            document.getElementById('level').textContent = level;
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(spawnInterval);
+            clearInterval(gameLoop);
+
+            notes.forEach(note => note.remove());
+            notes = [];
+
+            const accuracy = totalNotes > 0 ? Math.round((hitNotes / totalNotes) * 100) : 0;
+
+            const gameContent = document.getElementById('gameContent');
+            gameContent.innerHTML = `
+                <div class="game-over">
+                    <h2>Game Over!</h2>
+                    <div class="final-score">${score}</div>
+                    <div class="accuracy">Accuracy: ${accuracy}%</div>
+                    <div class="accuracy">Level Reached: ${level}</div>
+                    <div class="accuracy">Max Combo: ${combo}</div>
+                    <button onclick="location.reload()">Play Again</button>
+                </div>
+            `;
+        }
+
+        // Keyboard event listener
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (keys.includes(key)) {
+                hitNote(key);
+            }
+        });
+
+        // Prevent space bar from scrolling
+        window.addEventListener('keydown', (e) => {
+            if (e.key === ' ' && e.target === document.body) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
