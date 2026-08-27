@@ -26,6 +26,7 @@ The project is hosted on multiple platforms to be tested and modified.
   - [Cloning the Repository](#cloning-the-repository-inbox_tray)  
   - [Install Dependencies](#install-dependencies-wrench)  
 - [Running the Application](#running-the-application-rocket)  
+- [Running Tests](#running-tests-test_tube)
 - [Docker](#docker-)  
   - [Prerequisites](#prerequisites)  
   - [Running the Docker](#running-the-docker)
@@ -70,6 +71,38 @@ or
 http://localhost:1338
 ```
 
+## Running Tests :test_tube:
+The project includes a test suite to verify the basic functionality and project structure. To run the tests, use Python's built-in unittest module:
+
+```
+python -m unittest discover tests -v
+```
+
+This will run all tests in the `tests` directory and display verbose output.
+
+### Running Specific Tests
+To run a specific test file:
+```
+python -m unittest tests.test_basic -v
+```
+
+To run a specific test class:
+```
+python -m unittest tests.test_basic.TestProjectStructure -v
+```
+
+To run a specific test method:
+```
+python -m unittest tests.test_basic.TestProjectStructure.test_config_file_exists -v
+```
+
+### Test Coverage
+The current test suite includes:
+- Project structure validation
+- Configuration file validation
+- Basic file existence checks
+
+Note: The tests do not require the application dependencies to be installed, as they focus on structural validation.
 
 ## Docker 🐳
 ### Prerequisites
