@@ -26,6 +26,7 @@ The project is hosted on multiple platforms to be tested and modified.
   - [Cloning the Repository](#cloning-the-repository-inbox_tray)  
   - [Install Dependencies](#install-dependencies-wrench)  
 - [Running the Application](#running-the-application-rocket)  
+- [Running Tests](#running-tests-test_tube)
 - [Docker](#docker-)  
   - [Prerequisites](#prerequisites)  
   - [Running the Docker](#running-the-docker)
@@ -70,6 +71,51 @@ or
 http://localhost:1338
 ```
 
+## Running Tests :test_tube:
+This project includes a test suite to verify the functionality of the application.
+
+### Prerequisites
+Make sure you have installed all dependencies including the testing frameworks:
+```
+pip install -r requirements.txt
+```
+
+### Running All Tests
+To run the complete test suite, use pytest:
+```
+pytest
+```
+
+### Running Tests with Verbose Output
+For more detailed test output:
+```
+pytest -v
+```
+
+### Running Tests with Coverage Report
+To see code coverage information:
+```
+pytest --cov=server --cov=g4f
+```
+
+### Running Specific Test Files
+To run tests from a specific file:
+```
+pytest tests/test_basic.py
+```
+
+### Running Specific Test Functions
+To run a specific test function:
+```
+pytest tests/test_basic.py::test_imports
+```
+
+### Test Structure
+Tests are organized in the `tests/` directory:
+- `test_basic.py` - Basic functionality and import tests
+- Additional test files can be added following the `test_*.py` naming convention
+
+The test suite uses pytest as the testing framework. Configuration for pytest can be found in `pytest.ini`.
 
 ## Docker 🐳
 ### Prerequisites
