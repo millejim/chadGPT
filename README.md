@@ -26,6 +26,7 @@ The project is hosted on multiple platforms to be tested and modified.
   - [Cloning the Repository](#cloning-the-repository-inbox_tray)  
   - [Install Dependencies](#install-dependencies-wrench)  
 - [Running the Application](#running-the-application-rocket)  
+- [Running Tests](#running-tests-test_tube)
 - [Docker](#docker-)  
   - [Prerequisites](#prerequisites)  
   - [Running the Docker](#running-the-docker)
@@ -69,6 +70,51 @@ or
 ```
 http://localhost:1338
 ```
+
+## Running Tests :test_tube:
+This project currently does not have a formal test suite. However, if you would like to contribute tests or run tests in a fork, here are the recommended approaches:
+
+### Setting Up Testing
+To add testing capabilities to this project, you can install pytest, a popular Python testing framework:
+
+```
+pip install pytest pytest-flask pytest-asyncio
+```
+
+### Running Tests
+Once tests are added to the project, you can run them using:
+
+```
+pytest
+```
+
+To run tests with verbose output:
+```
+pytest -v
+```
+
+To run tests with coverage reporting:
+```
+pip install pytest-cov
+pytest --cov=server --cov=g4f
+```
+
+### Test Structure
+Tests should be organized in a `tests/` directory with the following structure:
+```
+tests/
+├── test_backend.py
+├── test_website.py
+├── test_api.py
+└── conftest.py
+```
+
+### Manual Testing
+You can manually test the application by:
+1. Starting the application with `python run.py`
+2. Opening your browser to `http://localhost:1338`
+3. Testing the chat functionality with various prompts
+4. Verifying the API endpoints respond correctly
 
 
 ## Docker 🐳
