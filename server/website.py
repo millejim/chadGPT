@@ -14,6 +14,10 @@ class Website:
                 'function': lambda: redirect(url_for('._index')),
                 'methods': ['GET', 'POST']
             },
+            '/dad-jokes/': {
+                'function': self._dad_jokes,
+                'methods': ['GET']
+            },
             '/chat/': {
                 'function': self._index,
                 'methods': ['GET', 'POST']
@@ -35,6 +39,10 @@ class Website:
                 'methods': ['GET']
             }
         }
+
+    def _dad_jokes(self):
+        """Serve the dad jokes page."""
+        return render_template('dad_jokes.html', url_prefix=self.url_prefix)
 
     def _chat(self, conversation_id):
         if '-' not in conversation_id:
