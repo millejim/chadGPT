@@ -26,6 +26,7 @@ The project is hosted on multiple platforms to be tested and modified.
   - [Cloning the Repository](#cloning-the-repository-inbox_tray)  
   - [Install Dependencies](#install-dependencies-wrench)  
 - [Running the Application](#running-the-application-rocket)  
+- [Running Tests](#running-tests-test_tube)
 - [Docker](#docker-)  
   - [Prerequisites](#prerequisites)  
   - [Running the Docker](#running-the-docker)
@@ -69,6 +70,49 @@ or
 ```
 http://localhost:1338
 ```
+
+## Running Tests :test_tube:
+This project uses pytest for testing. To run the test suite, follow these steps:
+
+### Install Test Dependencies
+First, install pytest and other testing dependencies:
+```
+pip install pytest pytest-cov pytest-asyncio
+```
+
+### Run All Tests
+To run all tests in the project:
+```
+pytest
+```
+
+### Run Tests with Coverage Report
+To run tests and generate a coverage report:
+```
+pytest --cov=server --cov=g4f --cov-report=html
+```
+
+This will generate an HTML coverage report in the `htmlcov` directory.
+
+### Run Specific Test Files
+To run a specific test file:
+```
+pytest tests/test_filename.py
+```
+
+### Run Tests in Verbose Mode
+For more detailed test output:
+```
+pytest -v
+```
+
+### Run Tests and Stop on First Failure
+To stop testing after the first failure:
+```
+pytest -x
+```
+
+Note: If you're contributing to this project and adding new features, please include appropriate tests for your code.
 
 
 ## Docker 🐳
