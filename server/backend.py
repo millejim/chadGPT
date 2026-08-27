@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 from g4f import ChatCompletion
+from server.dad_jokes import DadJokeGenerator
 from flask import request, Response, stream_with_context
 from requests import get
 from server.config import special_instructions
@@ -18,6 +19,14 @@ class Backend_Api:
             '/backend-api/v2/conversation': {
                 'function': self._conversation,
                 'methods': ['POST']
+            },
+            '/backend-api/dad-jokes/random': {
+                'function': self._get_random_joke,
+                'methods': ['GET']
+            },
+            '/backend-api/dad-jokes/all': {
+                'function': self._get_all_jokes,
+                'methods': ['GET']
             }
         }
 
@@ -52,6 +61,30 @@ class Backend_Api:
                 'success': False,
                 "error": f"an error occurred {str(e)}"
             }, 400
+
+    def _get_random_joke(self):
+        """
+        Get a random dad joke.
+        
+        :return: JSON response with setup and punchline
+        """
+        try:
+            joke = DadJokeGenerator.get_random_joke()
+            return {
+                'success': True,
+                'joke': joke,
+                'total_jokes': DadJokeGenerator.get_joke_count()
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }, 500
+    
+    def _get_all_jokes(self):
+        """Get all available dad jokes."""
+        jokes = DadJokeGenerator.get_all_jokes()
+        return {'success': True, 'jokes': jokes, 'total': len(jokes)}
 
 
 def build_messages(jailbreak):
