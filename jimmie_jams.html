@@ -268,6 +268,29 @@
             color: #666;
             margin-bottom: 20px;
         }
+
+        .music-controls {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .music-toggle {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            font-size: 0.9em;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .music-toggle:hover {
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
@@ -319,6 +342,12 @@
                 <button id="pauseBtn" onclick="togglePause()" disabled>Pause</button>
             </div>
 
+            <div class="music-controls">
+                <button class="music-toggle" onclick="toggleMusic()">
+                    <span id="musicStatus">🔊 Music: ON</span>
+                </button>
+            </div>
+
             <div class="instructions">
                 <h3>How to Play:</h3>
                 <ul>
@@ -347,6 +376,190 @@
         let totalNotes = 0;
         let hitNotes = 0;
 
+        // Audio context and music variables
+        let audioContext;
+        let musicEnabled = true;
+        let backgroundMusicNodes = [];
+        let musicStartTime = 0;
+
+        // Initialize audio context
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Play a note sound effect
+        function playNoteSound(frequency, duration = 0.1, type = 'sine') {
+            if (!musicEnabled || !audioContext) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        // Play perfect hit sound
+        function playPerfectSound() {
+            playNoteSound(880, 0.15, 'sine'); // A5
+            setTimeout(() => playNoteSound(1046.5, 0.1, 'sine'), 50); // C6
+        }
+
+        // Play good hit sound
+        function playGoodSound() {
+            playNoteSound(659.25, 0.12, 'sine'); // E5
+        }
+
+        // Play miss sound
+        function playMissSound() {
+            if (!musicEnabled || !audioContext) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.2);
+            oscillator.type = 'sawtooth';
+
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
+        // Play level up sound
+        function playLevelUpSound() {
+            if (!musicEnabled || !audioContext) return;
+
+            const frequencies = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+            frequencies.forEach((freq, index) => {
+                setTimeout(() => playNoteSound(freq, 0.15, 'triangle'), index * 80);
+            });
+        }
+
+        // Create background music loop
+        function startBackgroundMusic() {
+            if (!musicEnabled || !audioContext) return;
+
+            stopBackgroundMusic();
+
+            // Create a simple chord progression
+            const chordProgression = [
+                [261.63, 329.63, 392.00], // C major (C, E, G)
+                [293.66, 369.99, 440.00], // D minor (D, F, A)
+                [246.94, 311.13, 369.99], // B diminished (B, D, F)
+                [261.63, 329.63, 392.00], // C major (C, E, G)
+            ];
+
+            const bassLine = [130.81, 146.83, 123.47, 130.81]; // Bass notes
+
+            const chordDuration = 2; // seconds per chord
+            const loopDuration = chordProgression.length * chordDuration;
+
+            function playChord(frequencies, startTime, duration) {
+                frequencies.forEach(freq => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0, startTime);
+                    gainNode.gain.linearRampToValueAtTime(0.08, startTime + 0.1);
+                    gainNode.gain.setValueAtTime(0.08, startTime + duration - 0.2);
+                    gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+
+                    oscillator.start(startTime);
+                    oscillator.stop(startTime + duration);
+
+                    backgroundMusicNodes.push(oscillator);
+                });
+            }
+
+            function playBass(frequency, startTime, duration) {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'triangle';
+
+                gainNode.gain.setValueAtTime(0, startTime);
+                gainNode.gain.linearRampToValueAtTime(0.15, startTime + 0.05);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+
+                oscillator.start(startTime);
+                oscillator.stop(startTime + duration);
+
+                backgroundMusicNodes.push(oscillator);
+            }
+
+            // Schedule the music loop
+            function scheduleMusic() {
+                const currentTime = audioContext.currentTime;
+                
+                chordProgression.forEach((chord, index) => {
+                    const startTime = currentTime + (index * chordDuration);
+                    playChord(chord, startTime, chordDuration);
+                    playBass(bassLine[index], startTime, chordDuration);
+                });
+
+                // Schedule next loop
+                setTimeout(() => {
+                    if (gameActive && !paused && musicEnabled) {
+                        scheduleMusic();
+                    }
+                }, (loopDuration - 1) * 1000);
+            }
+
+            scheduleMusic();
+        }
+
+        // Stop background music
+        function stopBackgroundMusic() {
+            backgroundMusicNodes.forEach(node => {
+                try {
+                    node.stop();
+                } catch (e) {
+                    // Node might already be stopped
+                }
+            });
+            backgroundMusicNodes = [];
+        }
+
+        // Toggle music on/off
+        function toggleMusic() {
+            musicEnabled = !musicEnabled;
+            const statusElement = document.getElementById('musicStatus');
+            statusElement.textContent = musicEnabled ? '🔊 Music: ON' : '🔇 Music: OFF';
+
+            if (!musicEnabled) {
+                stopBackgroundMusic();
+            } else if (gameActive && !paused) {
+                initAudio();
+                startBackgroundMusic();
+            }
+        }
+
         function startGame() {
             score = 0;
             combo = 0;
@@ -358,6 +571,12 @@
             notes = [];
             gameActive = true;
             paused = false;
+
+            // Initialize audio
+            initAudio();
+            if (musicEnabled) {
+                startBackgroundMusic();
+            }
 
             updateDisplay();
             document.getElementById('startBtn').disabled = true;
@@ -377,9 +596,13 @@
             if (paused) {
                 clearInterval(spawnInterval);
                 clearInterval(gameLoop);
+                stopBackgroundMusic();
             } else {
                 spawnInterval = setInterval(spawnNote, 1000);
                 gameLoop = setInterval(checkNotes, 50);
+                if (musicEnabled) {
+                    startBackgroundMusic();
+                }
             }
         }
 
@@ -439,12 +662,14 @@
                         combo++;
                         hit = true;
                         hitNotes++;
+                        playPerfectSound();
                     } else if (timeDiff < 300) {
                         hitQuality = 'good';
                         score += 50 * (combo + 1);
                         combo++;
                         hit = true;
                         hitNotes++;
+                        playGoodSound();
                     }
 
                     if (hit) {
@@ -460,6 +685,7 @@
 
             if (!hit) {
                 showFeedback('miss');
+                playMissSound();
             }
         }
 
@@ -467,6 +693,7 @@
             combo = 0;
             missedNotes++;
             showFeedback('miss');
+            playMissSound();
             updateDisplay();
 
             if (missedNotes >= maxMisses) {
@@ -495,7 +722,7 @@
             if (newLevel > level) {
                 level = newLevel;
                 noteSpeed = Math.max(1500, 3000 - (level * 200));
-                showFeedback('perfect');
+                playLevelUpSound();
             }
         }
 
@@ -509,6 +736,7 @@
             gameActive = false;
             clearInterval(spawnInterval);
             clearInterval(gameLoop);
+            stopBackgroundMusic();
 
             notes.forEach(note => note.remove());
             notes = [];
