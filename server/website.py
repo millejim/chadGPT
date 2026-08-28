@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, session
+from flask import render_template, redirect, url_for, request, session, send_file
 from flask_babel import refresh
 from time import time
 from os import urandom
@@ -22,6 +22,10 @@ class Website:
                 'function': self._chat,
                 'methods': ['GET', 'POST']
             },
+            '/jimmie-jams': {
+                'function': self._jimmie_jams,
+                'methods': ['GET']
+            },
             '/change-language': {
                 'function': self.change_language,
                 'methods': ['POST']
@@ -44,6 +48,9 @@ class Website:
 
     def _index(self):
         return render_template('index.html', chat_id=f'{urandom(4).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{hex(int(time() * 1000))[2:]}', url_prefix=self.url_prefix)
+
+    def _jimmie_jams(self):
+        return send_file('jimmie_jams.html')
 
     def change_language(self):
         data = request.get_json()
