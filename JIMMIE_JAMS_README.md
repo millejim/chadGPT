@@ -19,12 +19,28 @@
 - **Score Multipliers**: Higher combos mean higher scores
 - **Visual Feedback**: See "PERFECT!", "GOOD!", or "MISS!" for each attempt
 - **Level Progression**: Advance through levels as your score increases
+- **Background Music**: Enjoy a looping chord progression while you play
+- **Sound Effects**: Hear different sounds for perfect hits, good hits, misses, and level ups
+- **Music Toggle**: Turn music on/off with the music control button
 
 ## Scoring
 
 - **Perfect Hit** (within 150ms): 100 points × (combo + 1)
 - **Good Hit** (within 300ms): 50 points × (combo + 1)
 - **Miss**: Resets your combo
+
+## Audio Features
+
+The game now includes a complete audio experience:
+
+- **Background Music**: A pleasant chord progression (C major - D minor - B diminished - C major) with bass line that loops throughout gameplay
+- **Perfect Hit Sound**: A bright, ascending two-note chime (A5 to C6)
+- **Good Hit Sound**: A single pleasant tone (E5)
+- **Miss Sound**: A descending buzz to indicate mistakes
+- **Level Up Sound**: An ascending arpeggio to celebrate your progress
+- **Music Control**: Toggle music on/off at any time without affecting gameplay
+
+All audio is generated using the Web Audio API, requiring no external files or dependencies.
 
 ## Game Ideas Considered
 
@@ -62,16 +78,17 @@ The rhythm game was selected because:
 - Responsive design
 - Keyboard controls (D, F, J, K keys)
 - Smooth animations using CSS and JavaScript
+- Web Audio API for procedurally generated music and sound effects
 
 ## Future Enhancement Ideas
 
-- Add background music and sound effects
 - Create different songs/patterns to play
 - Add a high score leaderboard (localStorage)
 - Include different difficulty modes
 - Add more lanes for increased challenge
 - Create a practice mode
 - Add visual themes or skins
+- Add more complex musical patterns and melodies
 
 ## Credits
 
